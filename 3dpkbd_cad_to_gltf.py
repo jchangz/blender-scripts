@@ -2,15 +2,17 @@ import bpy
 import os
 import bmesh
 import mathutils
+from bpy.types import Panel, Scene, Operator
+from bpy.props import StringProperty
 from math import radians
 
 
-class TOOL_OT_3dp_rename(bpy.types.Operator):
+class TOOL_OT_3dp_rename(Operator):
     bl_idname = "3dp.rename"
     bl_label = "rename"
     bl_description = "set name of object data"
     bl_options = {"REGISTER", "UNDO"}
-    foo: bpy.props.StringProperty(name="Name")
+    foo: StringProperty(name="Name")
 
     def execute(self, context):
         obj = context.active_object
@@ -20,7 +22,7 @@ class TOOL_OT_3dp_rename(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class TOOL_OT_3dp_initialize(bpy.types.Operator):
+class TOOL_OT_3dp_initialize(Operator):
     bl_idname = "3dp.init"
     bl_label = "init"
     bl_description = "transform, rotate and separate loose parts"
@@ -55,7 +57,7 @@ class TOOL_OT_3dp_initialize(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class TOOL_OT_3dp_dissolve(bpy.types.Operator):
+class TOOL_OT_3dp_dissolve(Operator):
     bl_idname = "3dp.ld"
     bl_label = "limited dissolve"
     bl_description = "limited dissolve mesh"
@@ -85,12 +87,12 @@ class TOOL_OT_3dp_dissolve(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class TOOL_OT_3dp_unwrap(bpy.types.Operator):
+class TOOL_OT_3dp_unwrap(Operator):
     bl_idname = "3dp.unwrap"
     bl_label = "unwrap uv"
     bl_description = "project uv from view"
     bl_options = {"REGISTER", "UNDO"}
-    foo: bpy.props.StringProperty(name="Direction")
+    foo: StringProperty(name="Direction")
 
     @classmethod
     def poll(cls, context):
@@ -149,10 +151,10 @@ class TOOL_OT_3dp_unwrap(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class TOOL_OT_3dp_export(bpy.types.Operator):
+class TOOL_OT_3dp_export(Operator):
     bl_idname = "3dp.export"
     bl_label = "xxport gltf"
-    foo: bpy.props.StringProperty(name="Direction")
+    foo: StringProperty(name="Direction")
     filename_ext = ".glb"
 
     @classmethod
@@ -173,7 +175,7 @@ class TOOL_OT_3dp_export(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class VIEW3D_PT_3dpkbd_uv_panel(bpy.types.Panel):
+class VIEW3D_PT_3dpkbd_uv_panel(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
 
@@ -222,24 +224,32 @@ class VIEW3D_PT_3dpkbd_uv_panel(bpy.types.Panel):
         row.operator("3dp.export", text="Export GLTF").foo = "side"
 
 
+classes = (
+    TOOL_OT_3dp_initialize,
+    TOOL_OT_3dp_dissolve,
+    TOOL_OT_3dp_unwrap,
+    TOOL_OT_3dp_rename,
+    TOOL_OT_3dp_export,
+    VIEW3D_PT_3dpkbd_uv_panel,
+)
+
+
 def register():
-    bpy.utils.register_class(TOOL_OT_3dp_initialize)
-    bpy.utils.register_class(TOOL_OT_3dp_dissolve)
-    bpy.utils.register_class(TOOL_OT_3dp_unwrap)
-    bpy.utils.register_class(TOOL_OT_3dp_rename)
-    bpy.utils.register_class(TOOL_OT_3dp_export)
-    bpy.utils.register_class(VIEW3D_PT_3dpkbd_uv_panel)
-    bpy.types.Scene.my_path = bpy.props.StringProperty(name="File", subtype="FILE_PATH")
+    from bpy.utils import register_class
+
+    for cls in classes:
+        register_class(cls)
+
+    Scene.my_path = StringProperty(name="File", subtype="FILE_PATH")
 
 
 def unregister():
-    bpy.utils.unregister_class(TOOL_OT_3dp_initialize)
-    bpy.utils.unregister_class(TOOL_OT_3dp_dissolve)
-    bpy.utils.unregister_class(TOOL_OT_3dp_unwrap)
-    bpy.utils.unregister_class(TOOL_OT_3dp_rename)
-    bpy.utils.unregister_class(TOOL_OT_3dp_export)
-    bpy.utils.unregister_class(VIEW3D_PT_3dpkbd_uv_panel)
-    del bpy.types.Scene.my_path
+    from bpy.utils import unregister_class
+
+    for cls in reversed(classes):
+        unregister_class(cls)
+
+    del Scene.my_path
 
 
 if __name__ == "__main__":
