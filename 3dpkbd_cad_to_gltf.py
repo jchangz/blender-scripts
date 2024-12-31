@@ -14,10 +14,15 @@ class TOOL_OT_3dp_rename(Operator):
     bl_options = {"REGISTER", "UNDO"}
     foo: StringProperty(name="Name")
 
+    @classmethod
+    def poll(cls, context):
+        return len(context.selected_objects) > 0
+
     def execute(self, context):
-        obj = context.active_object
-        obj.name = self.foo
-        obj.data.name = self.foo
+        selected = context.selected_objects
+        for obj in selected:
+            obj.name = self.foo
+            obj.data.name = self.foo
 
         return {"FINISHED"}
 
@@ -30,7 +35,10 @@ class TOOL_OT_3dp_initialize(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object.mode == "OBJECT"
+        return (
+            context.active_object.mode == "OBJECT"
+            and len(context.selected_objects) == 1
+        )
 
     def execute(self, context):
 
@@ -66,7 +74,9 @@ class TOOL_OT_3dp_dissolve(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object.mode == "OBJECT"
+        return (
+            context.active_object.mode == "OBJECT" and len(context.selected_objects) > 0
+        )
 
     def execute(self, context):
         meshes = set(o.data for o in context.selected_objects if o.type == "MESH")
