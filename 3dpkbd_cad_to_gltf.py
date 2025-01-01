@@ -61,6 +61,7 @@ class TOOL_OT_3dp_initialize(Operator):
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.separate(type="LOOSE")
         bpy.ops.object.mode_set(mode="OBJECT")
+        bpy.ops.view3d.view_all()
 
         return {"FINISHED"}
 
