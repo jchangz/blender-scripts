@@ -164,20 +164,16 @@ class TOOL_OT_3dp_unwrap(Operator):
 
 class TOOL_OT_3dp_export(Operator):
     bl_idname = "3dp.export"
-    bl_label = "xxport gltf"
-    foo: StringProperty(name="Direction")
+    bl_label = "export gltf"
     filename_ext = ".glb"
 
     @classmethod
     def poll(cls, context):
-        return len(context.selected_objects) > 0
+        return len(context.selected_objects) > 0 and context.scene.export_path
 
     def execute(self, context):
-        print(self, context.selected_objects)
-        print(context.scene.my_path)
-        print(os.path)
         bpy.ops.export_scene.gltf(
-            filepath=bpy.path.abspath(context.scene.my_path),
+            filepath=bpy.path.abspath(context.scene.export_path),
             use_selection=True,
             export_materials="PLACEHOLDER",
             export_animations=False,
@@ -190,7 +186,7 @@ class VIEW3D_PT_3dpkbd_uv_panel(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
 
-    bl_category = "3DPKBD Tool"
+    bl_category = "3DPKBD"
     bl_label = "3DPKBD Tool"
 
     def draw(self, context):
@@ -225,14 +221,19 @@ class VIEW3D_PT_3dpkbd_uv_panel(Panel):
         row.operator("3dp.rename", text="Blocker").foo = "blocker"
         row.operator("3dp.rename", text="Blocker-1").foo = "blocker-1"
         row.operator("3dp.rename", text="Blocker-2").foo = "blocker-2"
-        #
-        box = layout.box()
-        box.label(text="Export")
-        col = box.column(align=True)
-        col.prop(context.scene, "my_path", text="")
-        col.separator()
-        row = col.row()
-        row.operator("3dp.export", text="Export GLTF").foo = "side"
+
+
+class VIEW3D_PT_3dpkbd_export(Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "3DPKBD"
+    bl_label = "Export"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.row().prop(context.scene, "export_path", text="")
+        layout.row().operator("3dp.export", text="Export GLTF")
 
 
 classes = (
@@ -242,6 +243,7 @@ classes = (
     TOOL_OT_3dp_rename,
     TOOL_OT_3dp_export,
     VIEW3D_PT_3dpkbd_uv_panel,
+    VIEW3D_PT_3dpkbd_export,
 )
 
 
@@ -251,7 +253,7 @@ def register():
     for cls in classes:
         register_class(cls)
 
-    Scene.my_path = StringProperty(name="File", subtype="FILE_PATH")
+    Scene.export_path = StringProperty(name="File", subtype="FILE_PATH")
 
 
 def unregister():
@@ -260,7 +262,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
 
-    del Scene.my_path
+    del Scene.export_path
 
 
 if __name__ == "__main__":
