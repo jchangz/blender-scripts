@@ -208,19 +208,29 @@ class VIEW3D_PT_3dpkbd_uv_panel(Panel):
         row.operator("3dp.unwrap", text="Side UV").foo = "side"
         row.operator("3dp.unwrap", text="Top UV").foo = "top"
         row.operator("3dp.unwrap", text="Bottom UV").foo = "bottom"
-        #
-        box = layout.box()
-        box.label(text="Rename")
-        col = box.column(align=True)
-        row = col.row()
-        row.operator("3dp.rename", text="Top").foo = "top"
-        row.operator("3dp.rename", text="Standard").foo = "standard"
-        row.operator("3dp.rename", text="Vented").foo = "vented"
-        col.separator()
-        row = col.row()
-        row.operator("3dp.rename", text="Blocker").foo = "blocker"
-        row.operator("3dp.rename", text="Blocker-1").foo = "blocker-1"
-        row.operator("3dp.rename", text="Blocker-2").foo = "blocker-2"
+
+
+class VIEW3D_PT_3dpkbd_rename(Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "3DPKBD"
+    bl_label = "Rename"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+
+        row = layout.row()
+        col = row.column()
+        col.operator("3dp.rename", text="Top").foo = "top"
+        col.operator("3dp.rename", text="Standard").foo = "standard"
+        col.operator("3dp.rename", text="Vented").foo = "vented"
+        col = row.column()
+        col.operator("3dp.rename", text="Blocker").foo = "blocker"
+        col.operator("3dp.rename", text="Blocker-1").foo = "blocker-1"
+        col.operator("3dp.rename", text="Blocker-2").foo = "blocker-2"
 
 
 class VIEW3D_PT_3dpkbd_export(Panel):
@@ -243,6 +253,7 @@ classes = (
     TOOL_OT_3dp_rename,
     TOOL_OT_3dp_export,
     VIEW3D_PT_3dpkbd_uv_panel,
+    VIEW3D_PT_3dpkbd_rename,
     VIEW3D_PT_3dpkbd_export,
 )
 
