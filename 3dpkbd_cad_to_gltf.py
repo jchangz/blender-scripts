@@ -200,14 +200,24 @@ class VIEW3D_PT_3dpkbd_uv_panel(Panel):
         row = col.row()
         row.operator("3dp.ld", text="2°").foo = 2
         row.operator("3dp.ld", text="5°").foo = 5
-        #
-        box = layout.box()
-        box.label(text="UV Project from View")
-        col = box.column(align=True)
-        row = col.row()
-        row.operator("3dp.unwrap", text="Side UV").foo = "side"
-        row.operator("3dp.unwrap", text="Top UV").foo = "top"
-        row.operator("3dp.unwrap", text="Bottom UV").foo = "bottom"
+
+
+class VIEW3D_PT_3dpkbd_uv(Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "3DPKBD"
+    bl_label = "UV Project From View"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+
+        row = layout.row()
+        row.operator("3dp.unwrap", text="Side").foo = "side"
+        row.operator("3dp.unwrap", text="Top").foo = "top"
+        row.operator("3dp.unwrap", text="Bottom").foo = "bottom"
 
 
 class VIEW3D_PT_3dpkbd_rename(Panel):
@@ -253,6 +263,7 @@ classes = (
     TOOL_OT_3dp_rename,
     TOOL_OT_3dp_export,
     VIEW3D_PT_3dpkbd_uv_panel,
+    VIEW3D_PT_3dpkbd_uv,
     VIEW3D_PT_3dpkbd_rename,
     VIEW3D_PT_3dpkbd_export,
 )
