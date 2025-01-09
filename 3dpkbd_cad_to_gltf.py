@@ -2,9 +2,13 @@ import bpy
 import os
 import bmesh
 import mathutils
-from bpy.types import Panel, Scene, Operator
-from bpy.props import StringProperty
+from bpy.types import Panel, Scene, Operator, PropertyGroup
+from bpy.props import StringProperty, IntProperty, PointerProperty
 from math import radians
+
+
+class ToolSettings(PropertyGroup):
+    ld_angle: IntProperty(name="Limited Dissolve Angle", min=1, default=5, max=5)
 
 
 class TOOL_OT_3dp_rename(Operator):
@@ -71,7 +75,7 @@ class TOOL_OT_3dp_dissolve(Operator):
     bl_label = "limited dissolve"
     bl_description = "limited dissolve mesh"
     bl_options = {"REGISTER", "UNDO"}
-    foo: bpy.props.FloatProperty(name="Radius")
+    foo: IntProperty(name="Radius")
 
     @classmethod
     def poll(cls, context):
@@ -193,13 +197,24 @@ class VIEW3D_PT_3dpkbd_uv_panel(Panel):
         layout = self.layout
         row = layout.row()
         row.operator("3dp.init", text="Initialize Model")
-        #
-        box = layout.box()
-        box.label(text="Limited Dissolve")
-        col = box.column(align=True)
-        row = col.row()
-        row.operator("3dp.ld", text="2°").foo = 2
-        row.operator("3dp.ld", text="5°").foo = 5
+
+
+class VIEW3D_PT_3dpkbd_dissolve(Panel):
+
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "3DPKBD"
+    bl_label = "Limited Dissolve"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+
+        settings = context.scene.settings
+        layout.row().prop(settings, "ld_angle", text="Angle")
+        layout.row().operator("3dp.ld", text="Dissolve").foo = settings.ld_angle
 
 
 class VIEW3D_PT_3dpkbd_uv(Panel):
@@ -257,12 +272,14 @@ class VIEW3D_PT_3dpkbd_export(Panel):
 
 
 classes = (
+    ToolSettings,
     TOOL_OT_3dp_initialize,
     TOOL_OT_3dp_dissolve,
     TOOL_OT_3dp_unwrap,
     TOOL_OT_3dp_rename,
     TOOL_OT_3dp_export,
     VIEW3D_PT_3dpkbd_uv_panel,
+    VIEW3D_PT_3dpkbd_dissolve,
     VIEW3D_PT_3dpkbd_uv,
     VIEW3D_PT_3dpkbd_rename,
     VIEW3D_PT_3dpkbd_export,
@@ -275,6 +292,7 @@ def register():
     for cls in classes:
         register_class(cls)
 
+    Scene.settings = PointerProperty(type=ToolSettings)
     Scene.export_path = StringProperty(name="File", subtype="FILE_PATH")
 
 
@@ -284,6 +302,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
 
+    del Scene.settings
     del Scene.export_path
 
 
