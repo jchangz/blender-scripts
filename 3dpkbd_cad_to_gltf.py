@@ -9,6 +9,7 @@ from math import radians
 
 class ToolSettings(PropertyGroup):
     ld_angle: IntProperty(name="Limited Dissolve Angle", min=1, default=5, max=5)
+    export_path: StringProperty(name="File", subtype="FILE_PATH")
 
 
 class TOOL_OT_3dp_rename(Operator):
@@ -173,16 +174,17 @@ class TOOL_OT_3dp_export(Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(context.selected_objects) > 0 and context.scene.export_path
+        return len(context.selected_objects) > 0 and context.scene.settings.export_path
 
     def execute(self, context):
         bpy.ops.export_scene.gltf(
-            filepath=bpy.path.abspath(context.scene.export_path),
+            filepath=bpy.path.abspath(context.scene.settings.export_path),
             use_selection=True,
             export_materials="PLACEHOLDER",
             export_animations=False,
             export_morph=False,
         )
+        self.report({"INFO"}, "Exported to: " + context.scene.settings.export_path)
         return {"FINISHED"}
 
 
@@ -267,7 +269,8 @@ class VIEW3D_PT_3dpkbd_export(Panel):
     def draw(self, context):
         layout = self.layout
 
-        layout.row().prop(context.scene, "export_path", text="")
+        settings = context.scene.settings
+        layout.row().prop(settings, "export_path", text="")
         layout.row().operator("3dp.export", text="Export GLTF")
 
 
@@ -293,7 +296,6 @@ def register():
         register_class(cls)
 
     Scene.settings = PointerProperty(type=ToolSettings)
-    Scene.export_path = StringProperty(name="File", subtype="FILE_PATH")
 
 
 def unregister():
@@ -303,7 +305,6 @@ def unregister():
         unregister_class(cls)
 
     del Scene.settings
-    del Scene.export_path
 
 
 if __name__ == "__main__":
