@@ -215,8 +215,13 @@ class VIEW3D_PT_3dpkbd_dissolve(Panel):
         layout.use_property_decorate = False
 
         settings = context.scene.settings
-        layout.row().prop(settings, "ld_angle", text="Angle")
-        layout.row().operator("3dp.ld", text="Dissolve").foo = settings.ld_angle
+        row = layout.row()
+        row.active = (
+            context.active_object.mode == "OBJECT" and len(context.selected_objects) > 0
+        )
+        row.prop(settings, "ld_angle", text="Angle")
+        row = layout.row()
+        row.operator("3dp.ld", text="Dissolve").foo = settings.ld_angle
 
 
 class VIEW3D_PT_3dpkbd_uv(Panel):
