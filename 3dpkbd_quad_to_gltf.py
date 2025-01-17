@@ -11,6 +11,31 @@ class ToolSettings(PropertyGroup):
     export_path: StringProperty(name="File", subtype="FILE_PATH")
 
 
+class TOOL_OT_3dp_subdivision(Operator):
+    bl_idname = "3dp.subd"
+    bl_label = "subd"
+    bl_description = "transform, rotate and separate loose parts"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.active_object.mode == "OBJECT"
+            and len(context.selected_objects) == 1
+            and len([m for m in context.active_object.modifiers if m.type == "SUBSURF"])
+            < 1
+        )
+
+    def execute(self, context):
+
+        obj = context.active_object
+        mod = obj.modifiers.new("Subdivision", "SUBSURF")
+        mod.levels = 1
+        mod.render_levels = 1
+
+        return {"FINISHED"}
+
+
 class TOOL_OT_3dp_rename(Operator):
     bl_idname = "3dp.rename"
     bl_label = "rename"
@@ -128,6 +153,7 @@ class VIEW3D_PT_3dpkbd_uv_panel(Panel):
     def draw(self, context):
         layout = self.layout
         row = layout.row()
+        row.operator("3dp.subd", text="Add Subdivision")
 
 
 class VIEW3D_PT_3dpkbd_uv(Panel):
@@ -187,6 +213,7 @@ class VIEW3D_PT_3dpkbd_export(Panel):
 
 classes = (
     ToolSettings,
+    TOOL_OT_3dp_subdivision,
     TOOL_OT_3dp_unwrap,
     TOOL_OT_3dp_rename,
     TOOL_OT_3dp_export,
