@@ -37,7 +37,6 @@ class OriginOperator(Operator):
         # Switch to object mode to set origin
         bpy.ops.object.mode_set(mode="OBJECT")
         bpy.ops.object.origin_set(type="ORIGIN_CURSOR")
-        bpy.ops.object.mode_set(mode="EDIT")
 
         self.report({"INFO"}, "Object Origin Updated")
 
