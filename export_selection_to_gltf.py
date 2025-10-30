@@ -2,7 +2,7 @@ import bpy
 import bmesh
 import os
 from bpy.types import Operator
-from bpy.props import StringProperty, BoolProperty
+from bpy.props import StringProperty, BoolProperty, EnumProperty
 
 custom_keymap = None
 
@@ -21,6 +21,15 @@ class ExportOperator(Operator):
 
     apply_modifiers: BoolProperty(name="Apply Modifiers")
 
+    export_materials: EnumProperty(
+        name="Materials",
+        items=[
+            ("EXPORT", "Export", ""),
+            ("PLACEHOLDER", "Placeholder", ""),
+            ("NONE", "None", ""),
+        ],
+    )
+
     @classmethod
     def poll(cls, context):
         return len(context.selected_objects) > 0
@@ -36,7 +45,7 @@ class ExportOperator(Operator):
             filepath=self.filepath,
             use_selection=True,
             export_apply=self.apply_modifiers,
-            export_materials="PLACEHOLDER",
+            export_materials=self.export_materials,
             export_animations=False,
             export_morph=False,
         )
@@ -65,6 +74,9 @@ class ExportOperator(Operator):
 
         row = col.row()
         row.prop(self, "apply_modifiers")
+
+        row = col.row()
+        row.prop(self, "export_materials")
 
 
 def register():
