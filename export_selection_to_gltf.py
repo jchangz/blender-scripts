@@ -19,7 +19,7 @@ class ExportOperator(Operator):
 
     check_existing: BoolProperty(name="Check Existing", default=True)
 
-    apply_modifiers: BoolProperty(name="Apply Modifiers")
+    export_apply: BoolProperty(name="Apply Modifiers", default=True)
 
     export_materials: EnumProperty(
         name="Materials",
@@ -28,6 +28,7 @@ class ExportOperator(Operator):
             ("PLACEHOLDER", "Placeholder", ""),
             ("NONE", "None", ""),
         ],
+        default="PLACEHOLDER",
     )
 
     @classmethod
@@ -44,7 +45,7 @@ class ExportOperator(Operator):
         bpy.ops.export_scene.gltf(
             filepath=self.filepath,
             use_selection=True,
-            export_apply=self.apply_modifiers,
+            export_apply=self.export_apply,
             export_materials=self.export_materials,
             export_animations=False,
             export_morph=False,
@@ -69,14 +70,14 @@ class ExportOperator(Operator):
 
     def draw(self, context):
         layout = self.layout
-        col = layout.column()
-        col.label(text="Export Settings")
+        layout.use_property_split = True
 
-        row = col.row()
-        row.prop(self, "apply_modifiers")
+        box = layout.box()
+        box.label(text="Export Settings")
 
-        row = col.row()
-        row.prop(self, "export_materials")
+        col = box.column()
+        col.prop(self, "export_apply")
+        col.prop(self, "export_materials")
 
 
 def register():
@@ -86,10 +87,7 @@ def register():
     if key_config:
         key_map = key_config.keymaps.new(name="3D View", space_type="VIEW_3D")
         key_entry = key_map.keymap_items.new(
-            "export.selection_to_gltf",
-            type="Q",
-            value="PRESS",
-            shift=True,
+            "export.selection_to_gltf", type="E", value="PRESS", shift=True, ctrl=True
         )
         custom_keymap = (key_map, key_entry)
 
