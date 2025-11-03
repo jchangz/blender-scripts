@@ -8,6 +8,7 @@ custom_keymap = None
 class OriginOperator(Operator):
     bl_idname = "object.vertex_to_origin"
     bl_label = "Origin to Selected Vertex"
+    bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
     def poll(cls, context):
@@ -19,7 +20,7 @@ class OriginOperator(Operator):
         bm = bmesh.from_edit_mesh(mesh)
 
         selected_verts = [v for v in bm.verts if v.select]
-        if len(selected_verts) == 0:
+        if not len(selected_verts):
             self.report({"ERROR"}, "No Vertex Selected")
             return {"CANCELLED"}
 
