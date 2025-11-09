@@ -43,6 +43,31 @@ class TOOL_OT_initialize(Operator):
         return {"FINISHED"}
 
 
+class TOOL_OT_set_target(Operator):
+    bl_idname = "camera.target"
+    bl_label = "Set camera target"
+    bl_description = "Set empty to selected object"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.selected_objects) == 1
+
+    def execute(self, context):
+        empty_name = "3DEmpty"
+        empty_data = bpy.data.objects.get(empty_name)
+        if empty_data is None:
+            return {"CANCELLED"}
+
+        selected_obj = context.selected_objects[0]
+        obj_location = selected_obj.location
+        empty_data.location = obj_location
+
+        self.report({"INFO"}, "Empty set to %r" % obj_location)
+
+        return {"FINISHED"}
+
+
 class VIEW3D_PT_camera_coverage(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -58,9 +83,13 @@ class VIEW3D_PT_camera_coverage(Panel):
         row = layout.row()
         row.operator("camera.init", text="Initialize")
 
+        row = layout.row()
+        row.operator("camera.target", text="Set Target")
+
 
 classes = (
     TOOL_OT_initialize,
+    TOOL_OT_set_target,
     VIEW3D_PT_camera_coverage,
 )
 
