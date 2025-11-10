@@ -1,5 +1,10 @@
 import bpy
-from bpy.types import Panel, Operator
+from bpy.types import Panel, Scene, Operator, PropertyGroup, Object
+from bpy.props import PointerProperty
+
+
+class ToolSettings(PropertyGroup):
+    selected_object: PointerProperty(type=Object)
 
 
 class TOOL_OT_initialize(Operator):
@@ -51,7 +56,7 @@ class TOOL_OT_set_target(Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(context.selected_objects) == 1
+        return context.scene.settings.selected_object is not None
 
     def execute(self, context):
         empty_name = "3DEmpty"
@@ -59,7 +64,7 @@ class TOOL_OT_set_target(Operator):
         if empty_data is None:
             return {"CANCELLED"}
 
-        selected_obj = context.selected_objects[0]
+        selected_obj = context.scene.settings.selected_object
         obj_location = selected_obj.location
         empty_data.location = obj_location
 
@@ -83,11 +88,18 @@ class VIEW3D_PT_camera_coverage(Panel):
         row = layout.row()
         row.operator("camera.init", text="Initialize")
 
-        row = layout.row()
+        settings = context.scene.settings
+
+        box = layout.box()
+        box.label(text="Target")
+        row = box.row()
+        row.prop(settings, "selected_object", text="Object")
+        row = box.row()
         row.operator("camera.target", text="Set Target")
 
 
 classes = (
+    ToolSettings,
     TOOL_OT_initialize,
     TOOL_OT_set_target,
     VIEW3D_PT_camera_coverage,
@@ -100,12 +112,16 @@ def register():
     for cls in classes:
         register_class(cls)
 
+    Scene.settings = PointerProperty(type=ToolSettings)
+
 
 def unregister():
     from bpy.utils import unregister_class
 
     for cls in reversed(classes):
         unregister_class(cls)
+
+    del Scene.settings
 
 
 if __name__ == "__main__":
