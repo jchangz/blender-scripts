@@ -4,6 +4,8 @@ from bpy.props import PointerProperty
 
 
 class ToolSettings(PropertyGroup):
+    camera: PointerProperty(type=Object)
+    empty: PointerProperty(type=Object)
     selected_object: PointerProperty(type=Object)
 
 
@@ -41,6 +43,10 @@ class TOOL_OT_initialize(Operator):
 
         context.scene.camera = camera_object
 
+        # Set tool settings camera and empty
+        context.scene.settings.camera = camera_object
+        context.scene.settings.empty = empty_object
+
         bpy.ops.view3d.view_camera()
 
         self.report({"INFO"}, "Camera Initialized")
@@ -56,17 +62,21 @@ class TOOL_OT_set_target(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.settings.selected_object is not None
+        settings = context.scene.settings
+        return (
+            settings.selected_object is not None
+            and settings.camera is not None
+            and settings.empty is not None
+        )
 
     def execute(self, context):
-        empty_name = "3DEmpty"
-        empty_data = bpy.data.objects.get(empty_name)
-        if empty_data is None:
-            return {"CANCELLED"}
+        settings = context.scene.settings
 
-        selected_obj = context.scene.settings.selected_object
+        selected_obj = settings.selected_object
         obj_location = selected_obj.location
-        empty_data.location = obj_location
+
+        empty = settings.empty
+        empty.location = obj_location
 
         self.report({"INFO"}, "Empty set to %r" % obj_location)
 
@@ -85,13 +95,19 @@ class VIEW3D_PT_camera_coverage(Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
 
-        row = layout.row()
-        row.operator("camera.init", text="Initialize")
-
         settings = context.scene.settings
 
         box = layout.box()
-        box.label(text="Target")
+        row = box.row()
+        row.prop(settings, "camera", text="Camera")
+        row.enabled = False
+        row = box.row()
+        row.prop(settings, "empty", text="Empty")
+        row.enabled = False
+        row = box.row()
+        row.operator("camera.init", text="Initialize")
+
+        box = layout.box()
         row = box.row()
         row.prop(settings, "selected_object", text="Object")
         row = box.row()
