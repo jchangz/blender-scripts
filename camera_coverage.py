@@ -67,6 +67,7 @@ class TOOL_OT_set_target(Operator):
             settings.selected_object is not None
             and settings.camera is not None
             and settings.empty is not None
+            and settings.selected_object.location != settings.empty.location
         )
 
     def execute(self, context):
