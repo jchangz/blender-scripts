@@ -1,6 +1,7 @@
 import bpy
+from math import radians
 from bpy.types import Panel, Scene, Operator, PropertyGroup, Object
-from bpy.props import PointerProperty
+from bpy.props import PointerProperty, FloatProperty
 
 
 class ToolSettings(PropertyGroup):
@@ -84,6 +85,29 @@ class TOOL_OT_set_target(Operator):
         return {"FINISHED"}
 
 
+class TOOL_OT_position_camera(Operator):
+    bl_idname = "camera.position"
+    bl_label = "Set camera position"
+    bl_description = "Set empty x rotation"
+    bl_options = {"REGISTER", "UNDO"}
+    angle: FloatProperty(name="Angle")
+
+    @classmethod
+    def poll(cls, context):
+        settings = context.scene.settings
+        return settings.camera is not None and settings.empty is not None
+
+    def execute(self, context):
+        settings = context.scene.settings
+
+        empty = settings.empty
+        empty.rotation_euler[0] = radians(self.angle)
+
+        self.report({"INFO"}, "Empty x rotation set to %r" % self.angle)
+
+        return {"FINISHED"}
+
+
 class VIEW3D_PT_camera_coverage(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -114,11 +138,21 @@ class VIEW3D_PT_camera_coverage(Panel):
         row = box.row()
         row.operator("camera.target", text="Set Target")
 
+        box = layout.box()
+        row = box.row()
+        row.alignment = "CENTER"
+        row.label(text="Position", icon="LIGHT_AREA")
+        row = box.row()
+        row.operator("camera.position", text="Top").angle = 45.0
+        row.operator("camera.position", text="Center").angle = 0.0
+        row.operator("camera.position", text="Bottom").angle = -45.0
+
 
 classes = (
     ToolSettings,
     TOOL_OT_initialize,
     TOOL_OT_set_target,
+    TOOL_OT_position_camera,
     VIEW3D_PT_camera_coverage,
 )
 
