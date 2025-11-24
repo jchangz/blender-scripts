@@ -166,9 +166,9 @@ class VIEW3D_PT_camera_coverage(Panel):
         row.alignment = "CENTER"
         row.label(text="Position", icon="LIGHT_AREA")
         row = box.grid_flow(even_columns=True)
-        row.operator("camera.position", text="", icon="ALIGN_TOP").angle = 45.0
+        row.operator("camera.position", text="", icon="ALIGN_TOP").angle = -45.0
         row.operator("camera.position", text="", icon="ALIGN_MIDDLE").angle = 0.0
-        row.operator("camera.position", text="", icon="ALIGN_BOTTOM").angle = -45.0
+        row.operator("camera.position", text="", icon="ALIGN_BOTTOM").angle = 45.0
 
         box = layout.box()
         row = box.row()
