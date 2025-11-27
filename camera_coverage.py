@@ -1,13 +1,22 @@
 import bpy
 from math import radians
 from bpy.types import Panel, Scene, Operator, PropertyGroup, Object
-from bpy.props import PointerProperty, FloatProperty
+from bpy.props import (
+    PointerProperty,
+    FloatProperty,
+    IntProperty,
+    BoolProperty,
+)
 
 
 class ToolSettings(PropertyGroup):
     camera: PointerProperty(type=Object)
     empty: PointerProperty(type=Object)
     selected_object: PointerProperty(type=Object)
+    keyframes_enable: BoolProperty(name="Enable Keyframes", default=False)
+    keyframes_position: IntProperty(
+        name="Keyframe", min=1, default=10, step=10, max=250
+    )
 
 
 class TOOL_OT_initialize(Operator):
@@ -102,6 +111,10 @@ class TOOL_OT_position_camera(Operator):
 
         empty = settings.empty
         empty.rotation_euler[0] = radians(self.angle)
+        if settings.keyframes_enable:
+            empty.keyframe_insert(
+                data_path="rotation_euler", frame=settings.keyframes_position
+            )
 
         self.report({"INFO"}, "Empty x rotation set to %r" % self.angle)
 
@@ -125,6 +138,10 @@ class TOOL_OT_rotate_camera(Operator):
 
         empty = settings.empty
         empty.rotation_euler[2] = radians(self.angle)
+        if settings.keyframes_enable:
+            empty.keyframe_insert(
+                data_path="rotation_euler", frame=settings.keyframes_position
+            )
 
         self.report({"INFO"}, "Empty z rotation set to %r" % self.angle)
 
@@ -160,6 +177,18 @@ class VIEW3D_PT_camera_coverage(Panel):
         row.prop(settings, "selected_object", text="Object")
         row = box.row()
         row.operator("camera.target", text="Set Target")
+
+        box = layout.box()
+        row = box.row()
+        row.alignment = "CENTER"
+        row.label(text="Keyframe")
+        row = box.row()
+        row.prop(settings, "keyframes_enable", text="")
+        row.label(text="Enable")
+        row = box.row()
+        row.prop(settings, "keyframes_position", text="")
+        row.enabled = settings.keyframes_enable
+        row = box.row()
 
         box = layout.box()
         row = box.row()
