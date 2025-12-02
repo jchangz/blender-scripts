@@ -214,6 +214,11 @@ class VIEW3D_PT_camera_coverage(Panel):
         row.operator("camera.rotate", text="", icon="TRIA_DOWN").angle = 0.0
         row.operator("camera.rotate", text="").angle = 45.0
 
+        cam = settings.camera.data
+        box = layout.box()
+        row = box.row()
+        row.prop(cam, "ortho_scale")
+
 
 classes = (
     ToolSettings,
