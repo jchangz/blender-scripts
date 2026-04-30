@@ -1,9 +1,7 @@
 import bpy
-import os
-import bmesh
 import mathutils
 from bpy.types import Panel, Scene, Operator, PropertyGroup
-from bpy.props import StringProperty, IntProperty, PointerProperty
+from bpy.props import StringProperty, PointerProperty
 from math import radians
 
 
@@ -20,7 +18,8 @@ class TOOL_OT_3dp_subdivision(Operator):
     @classmethod
     def poll(cls, context):
         return (
-            context.active_object.mode == "OBJECT"
+            context.active_object is not None
+            and context.active_object.mode == "OBJECT"
             and len(context.selected_objects) == 1
             and len([m for m in context.active_object.modifiers if m.type == "SUBSURF"])
             < 1
@@ -67,7 +66,9 @@ class TOOL_OT_3dp_unwrap(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object.mode == "EDIT"
+        return (
+            context.active_object is not None and context.active_object.mode == "EDIT"
+        )
 
     def execute(self, context):
         camera_data = bpy.data.cameras.get("3DPCamera")
@@ -123,6 +124,8 @@ class TOOL_OT_3dp_unwrap(Operator):
 class TOOL_OT_3dp_export(Operator):
     bl_idname = "3dp.export"
     bl_label = "export gltf"
+    bl_description = "export selection as glTF"
+    bl_options = {"REGISTER"}
     filename_ext = ".glb"
 
     @classmethod

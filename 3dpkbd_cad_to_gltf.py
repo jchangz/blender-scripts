@@ -1,5 +1,4 @@
 import bpy
-import os
 import bmesh
 import mathutils
 from bpy.types import Panel, Scene, Operator, PropertyGroup
@@ -43,7 +42,8 @@ class TOOL_OT_3dp_initialize(Operator):
     @classmethod
     def poll(cls, context):
         return (
-            context.active_object.mode == "OBJECT"
+            context.active_object is not None
+            and context.active_object.mode == "OBJECT"
             and len(context.selected_objects) == 1
         )
 
@@ -63,7 +63,7 @@ class TOOL_OT_3dp_initialize(Operator):
             if vert < height:
                 height = vert
 
-        obj.location = (0.0, 0.0, abs(height) / 100)
+        obj.location = (0.0, 0.0, abs(height) * 0.01)
         bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.separate(type="LOOSE")
@@ -83,7 +83,9 @@ class TOOL_OT_3dp_dissolve(Operator):
     @classmethod
     def poll(cls, context):
         return (
-            context.active_object.mode == "OBJECT" and len(context.selected_objects) > 0
+            context.active_object is not None
+            and context.active_object.mode == "OBJECT"
+            and len(context.selected_objects) > 0
         )
 
     def execute(self, context):
@@ -116,7 +118,9 @@ class TOOL_OT_3dp_unwrap(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object.mode == "EDIT"
+        return (
+            context.active_object is not None and context.active_object.mode == "EDIT"
+        )
 
     def execute(self, context):
         camera_data = bpy.data.cameras.get("3DPCamera")
@@ -172,6 +176,8 @@ class TOOL_OT_3dp_unwrap(Operator):
 class TOOL_OT_3dp_export(Operator):
     bl_idname = "3dp.export"
     bl_label = "export gltf"
+    bl_description = "export selection as glTF"
+    bl_options = {"REGISTER"}
     filename_ext = ".glb"
 
     @classmethod
@@ -221,7 +227,9 @@ class VIEW3D_PT_3dpkbd_dissolve(Panel):
         settings = context.scene.settings
         row = layout.row()
         row.active = (
-            context.active_object.mode == "OBJECT" and len(context.selected_objects) > 0
+            context.active_object is not None
+            and context.active_object.mode == "OBJECT"
+            and len(context.selected_objects) > 0
         )
         row.prop(settings, "ld_angle", text="Angle")
         row = layout.row()
