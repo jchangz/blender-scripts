@@ -2,7 +2,7 @@ import bpy
 import bmesh
 from bpy.types import Operator
 
-custom_keymap = None
+custom_keymap = []
 
 
 class OriginOperator(Operator):
@@ -47,6 +47,7 @@ class OriginOperator(Operator):
 def register():
     bpy.utils.register_class(OriginOperator)
 
+    global custom_keymap
     key_config = bpy.context.window_manager.keyconfigs.addon
     if key_config:
         key_map = key_config.keymaps.new(name="3D View", space_type="VIEW_3D")
@@ -56,10 +57,12 @@ def register():
             value="PRESS",
             shift=True,
         )
-        custom_keymap = (key_map, key_entry)
+        custom_keymap.append((key_map, key_entry))
 
 
 def unregister():
+    global custom_keymap
+
     for key_map, key_entry in custom_keymap:
         key_map.keymap_items.remove(key_entry)
     custom_keymap.clear()
