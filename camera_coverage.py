@@ -30,16 +30,16 @@ class TOOL_OT_initialize(Operator):
         empty_name = "3DEmpty"
 
         # Create empty
-        empty_data = bpy.data.objects.get(empty_name)
-        if empty_data is None:
-            new_empty_object = bpy.data.objects.new(empty_name, empty_data)
+        if bpy.data.objects.get(empty_name) is None:
+            new_empty_object = bpy.data.objects.new(empty_name, None)
             context.scene.collection.objects.link(new_empty_object)
 
         # Create camera
         camera_data = bpy.data.cameras.get(camera_name)
         if camera_data is None:
             camera_data = bpy.data.cameras.new(name=camera_name)
-            camera_data.type = "ORTHO"
+
+        camera_data.type = "ORTHO"
 
         # Track camera to empty
         empty_object = bpy.data.objects.get(empty_name)
@@ -77,7 +77,8 @@ class TOOL_OT_set_target(Operator):
             settings.selected_object is not None
             and settings.camera is not None
             and settings.empty is not None
-            and settings.selected_object.location != settings.empty.location
+            and (settings.selected_object.location - settings.empty.location).length
+            > 1e-6
         )
 
     def execute(self, context):
@@ -214,10 +215,11 @@ class VIEW3D_PT_camera_coverage(Panel):
         row.operator("camera.rotate", text="", icon="TRIA_DOWN").angle = 0.0
         row.operator("camera.rotate", text="").angle = 45.0
 
-        cam = settings.camera.data
-        box = layout.box()
-        row = box.row()
-        row.prop(cam, "ortho_scale")
+        if settings.camera:
+            cam = settings.camera.data
+            box = layout.box()
+            row = box.row()
+            row.prop(cam, "ortho_scale")
 
 
 classes = (
