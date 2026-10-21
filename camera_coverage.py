@@ -9,6 +9,19 @@ from bpy.props import (
 )
 
 
+def apply_camera_distance(camera_object, distance):
+    # Camera is parented to the empty, so this is an offset from the target
+    camera_object.location = (0, -distance, 0)
+    # Ortho framing ignores distance; it only needs to keep the object inside the clip range
+    camera_object.data.clip_start = 0.1
+    camera_object.data.clip_end = distance * 2
+
+
+def update_camera_distance(self, context):
+    if self.camera is not None:
+        apply_camera_distance(self.camera, self.camera_distance)
+
+
 class ToolSettings(PropertyGroup):
     camera: PointerProperty(type=Object)
     empty: PointerProperty(type=Object)
@@ -16,6 +29,12 @@ class ToolSettings(PropertyGroup):
     keyframes_enable: BoolProperty(name="Enable Keyframes", default=False)
     keyframes_position: IntProperty(
         name="Keyframe", min=1, default=10, step=10, max=250
+    )
+    camera_distance: FloatProperty(
+        name="Camera Distance",
+        min=0.1,
+        default=10.0,
+        update=update_camera_distance,
     )
 
 
@@ -50,6 +69,8 @@ class TOOL_OT_initialize(Operator):
             constraint = camera_object.constraints.new(type="TRACK_TO")
             constraint.target = empty_object
             context.scene.collection.objects.link(camera_object)
+
+        apply_camera_distance(camera_object, context.scene.settings.camera_distance)
 
         context.scene.camera = camera_object
 
@@ -220,6 +241,8 @@ class VIEW3D_PT_camera_coverage(Panel):
             box = layout.box()
             row = box.row()
             row.prop(cam, "ortho_scale")
+            row = box.row()
+            row.prop(settings, "camera_distance")
 
 
 classes = (
