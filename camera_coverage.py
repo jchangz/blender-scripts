@@ -22,10 +22,14 @@ def update_camera_distance(self, context):
         apply_camera_distance(self.camera, self.camera_distance)
 
 
+def poll_selected_object(self, obj):
+    return obj.type == "MESH" and obj not in (self.camera, self.empty)
+
+
 class ToolSettings(PropertyGroup):
     camera: PointerProperty(type=Object)
     empty: PointerProperty(type=Object)
-    selected_object: PointerProperty(type=Object)
+    selected_object: PointerProperty(type=Object, poll=poll_selected_object)
     keyframes_enable: BoolProperty(name="Enable Keyframes", default=False)
     keyframes_position: IntProperty(
         name="Keyframe", min=1, default=10, step=10, max=250
