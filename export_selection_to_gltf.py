@@ -10,7 +10,7 @@ custom_keymap = []
 class ExportOperator(Operator):
     bl_idname = "export.selection_to_gltf"
     bl_label = "Export glTF 2.0"
-    bl_options = {"REGISTER", "UNDO"}
+    bl_options = {"REGISTER"}
 
     filepath: StringProperty(subtype="FILE_PATH")
 
@@ -18,7 +18,9 @@ class ExportOperator(Operator):
 
     filter_glob: StringProperty(default="*.glb", options={"HIDDEN"})
 
-    check_existing: BoolProperty(name="Check Existing", default=True)
+    check_existing: BoolProperty(
+        name="Check Existing", default=True, options={"HIDDEN"}
+    )
 
     export_apply: BoolProperty(name="Apply Modifiers", default=True)
 
@@ -34,9 +36,7 @@ class ExportOperator(Operator):
 
     @classmethod
     def poll(cls, context):
-        return (
-            context.selected_objects is not None and len(context.selected_objects) > 0
-        )
+        return bool(getattr(context, "selected_objects", None))
 
     def execute(self, context):
         # The 'self.options.is_invoke' check was removed as it's not standard API
